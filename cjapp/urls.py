@@ -15,10 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+
+from restapi import views
 from restapi.views import *
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'', index),
+    url(r'^api/user/login/', views.User_login.as_view()),
+    url(r'^api/user/change-password/', views.change_password.as_view()),
 ]
