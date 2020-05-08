@@ -21,8 +21,6 @@ class Users_Details(models.Model):
     email = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=15, validators=[alphanumeric])
     is_logged_in = models.CustomBooleanField()
-    confirm_password = models.CharField(max_length=15, validators=[alphanumeric])
-
 
 
 

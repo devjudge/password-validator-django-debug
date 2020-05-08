@@ -17,7 +17,6 @@ from django.conf.urls import url
 from django.contrib import admin
 
 from restapi import views
-from restapi.views import *
 
 
 urlpatterns = [

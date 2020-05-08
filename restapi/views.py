@@ -2,9 +2,9 @@
 from __future__ import unicode_literals
 
 import json
-
+import uuid
 from django.core.validators import RegexValidator
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 
 # Create your views here.
 from rest_framework.generics import get_object_or_404
@@ -22,24 +22,33 @@ class User_login(APIView):
         data = json.loads(request.body.decode("utf-8"))
 
         try:
-            email = data['email']
-            password = data['password']
+            email = data.get('email', None)
+            password = data.get('password', None)
 
-            try:
-                result = get_object_or_404(Users_Details, email=password, password=email)
-                print(result)
-            except Exception as e:
-                error = {"status": "failure", "reason": str(e)}
-                return JsonResponse(error, status=404)
+            if password and email:
 
-            res = {"status": "success"}
-            return Response(res, status=status.HTTP_200_OK)
+                try:
+                    result = get_object_or_404(Users_Details, email=email, password=password)
+                    Users_Details.objects.filter(email=result.email, password=result.password).update(is_logged_in=1, auth_token=uuid.uuid4().hex)
+
+                    field_name = 'auth_token'
+                    obj = Users_Details.objects.first()
+                    field_object = Users_Details._meta.get_field(field_name)
+                    field_value = getattr(obj, field_object.attname)
+
+                    res = {"status": "success", "auth_token": field_value}
+                    return Response(res, status=status.HTTP_200_OK)
+
+                except Http404 as e:
+                    error = {"status": "failure", "reason": str(e)}
+                    return JsonResponse(error, status=status.HTTP_404_NOT_FOUND)
+
+            res = {"status": "failure"}
+            return Response(res, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             error = {"status": "failure", "reason": str(e)}
-            return JsonResponse(error, status=400)
+            return JsonResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class change_password(APIView):
@@ -48,26 +57,20 @@ class change_password(APIView):
         data = json.loads(request.body.decode("utf-8"))
 
         try:
-            email = data['email']
-            password = data['password']
-            confirm_password = data['confirm_password']
+            auth_token = request.META['HTTP_AUTH_TOKEN']
+            password = data.get('password', None)
+            confirm_password = data.get('confirm_password', None)
 
-            # if email is None or password is None or confirm_password is None:
-            #     res = {"status": "failure"}
-            #     return Response(res, status=status.HTTP_400_BAD_REQUEST)
-
-            if 10 <= len(password) <= 15 and password.isalnum() and confirm_password == password:
+            if password and confirm_password and confirm_password == password:
 
                 try:
-                    result = get_object_or_404(Users_Details, email=email)
+                    result = Users_Details.objects.get(auth_token=auth_token)
                     result.password = password
-                    result.confirm_password = confirm_password
                     result.save()
-                    print(result)
 
-                except Exception as e:
+                except Users_Details.DoesNotExist as e:
                     error = {"status": "failure", "reason": str(e)}
-                    return JsonResponse(error, status=404)
+                    return Response(error, status=status.HTTP_401_UNAUTHORIZED)
 
                 res = {"status": "success"}
                 return Response(res, status=status.HTTP_200_OK)
@@ -76,7 +79,6 @@ class change_password(APIView):
             return Response(res, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             error = {"status": "failure", "reason": str(e)}
-            return JsonResponse(error, status=400)
+            return JsonResponse(error, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
