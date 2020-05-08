@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.core.validators import RegexValidator
-from django.db import models, migrations
+from django.db import models
 
 # Create your models here.
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
@@ -17,11 +17,9 @@ class CustomBooleanField(models.BooleanField):
 
 
 class Users_Details(models.Model):
+
     name = models.CharField(max_length=100)
     email = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=15, validators=[alphanumeric])
-    is_logged_in = models.CustomBooleanField()
-
-
-
-
+    is_logged_in = CustomBooleanField(default=False)
+    auth_token = models.CharField(max_length=100)
