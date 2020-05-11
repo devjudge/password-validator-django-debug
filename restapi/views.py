@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import json
 import uuid
 from django.core.validators import RegexValidator
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import JsonResponse, Http404
 
 # Create your views here.
 from rest_framework.generics import get_object_or_404

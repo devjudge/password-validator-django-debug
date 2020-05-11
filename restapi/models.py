@@ -22,4 +22,4 @@ class Users_Details(models.Model):
     email = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=15, validators=[alphanumeric])
     is_logged_in = CustomBooleanField(default=False)
-    auth_token = models.CharField(max_length=100)
+    auth_token = models.CharField(max_length=100, unique=True)
