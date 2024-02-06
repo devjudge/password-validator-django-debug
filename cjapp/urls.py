@@ -20,6 +20,7 @@ from restapi import views
 
 
 urlpatterns = [
+    url(r'^$', views.index.as_view(), name='index'),
     url(r'^admin/', admin.site.urls),
     url(r'^api/user/login/', views.User_login.as_view()),
     url(r'^api/user/change-password/', views.change_password.as_view()),
