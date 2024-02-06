@@ -5,6 +5,7 @@ import json
 import uuid
 from django.core.validators import RegexValidator
 from django.http import JsonResponse, Http404
+from django.shortcuts import render
 
 # Create your views here.
 from rest_framework.generics import get_object_or_404
@@ -14,6 +15,12 @@ from rest_framework.views import APIView
 from restapi.models import Users_Details
 
 alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', 'Only alphanumeric characters are allowed.')
+
+
+class index(APIView):
+    def get(self, request):
+        message = "Hello, World!"
+        return render(request, 'index.html', {'message': message})
 
 
 class User_login(APIView):
